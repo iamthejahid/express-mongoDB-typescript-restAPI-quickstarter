@@ -9,10 +9,8 @@ import { accessTokenDetailAndRefreshTokenDetail } from "@main/utils/tokens";
 import { modelValidationCheck } from "@main/utils/validationError";
 import { Request, Response } from "express";
 import httpStatus from "http-status";
-import { ObjectId } from "mongoose";
-
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
+import jwt from "jsonwebtoken";
+import mongoose, { ObjectId } from "mongoose";
 
 type userT = {
   _id: ObjectId;
@@ -115,8 +113,8 @@ const userLogin = catchAsyncErr(async (req: any, res: Response) => {
 const renewToken = catchAsyncErr(async (req: any, res: Response) => {
   const { access, refresh } = req.body;
 
-  const accessDetail: jwtI = jwt.decode(access, { complete: true });
-  const refreshDetail: jwtI = jwt.decode(refresh, { complete: true });
+  const accessDetail: any = jwt.decode(access, { complete: true });
+  const refreshDetail: any = jwt.decode(refresh, { complete: true });
 
   if (
     accessDetail &&
@@ -125,7 +123,7 @@ const renewToken = catchAsyncErr(async (req: any, res: Response) => {
     refreshDetail?.payload?.user
   ) {
     // Checking Refresh Token Expired Date
-    if (new Date(refreshDetail.payload.exp) < new Date())
+    if (new Date(refreshDetail.payload.exp * 1000) < new Date())
       return apiResponse(res, httpStatus.UNAUTHORIZED, {
         message: "Session expired. Please login again.",
       });
@@ -159,9 +157,9 @@ const emailTokenVerify = catchAsyncErr(async (req: any, res: Response) => {
   const { token } = req.params;
 
   // verify the token from the URL
-  let payload = null;
+  let payload: any = null;
   try {
-    payload = jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET);
+    payload = jwt.verify(token, process.env.USER_VERIFICATION_TOKEN_SECRET as string);
   } catch (err) {
     return apiResponse(res, httpStatus.NOT_ACCEPTABLE, {
       message: "Invalid Email!",
