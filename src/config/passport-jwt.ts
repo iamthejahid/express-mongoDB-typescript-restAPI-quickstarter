@@ -16,7 +16,7 @@ const passportJwtInit = new passportJwt.Strategy(
       if (!accessUser) return done({ message: "Invalid Token" }, null);
 
       const currentDate = new Date();
-      if (currentDate > new Date(jwt_payload.exp))
+      if (currentDate > new Date(jwt_payload.exp * 1000))
         return done({ message: "Expired Token" }, null);
 
       return done(null, jwt_payload);

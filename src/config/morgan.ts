@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-const morgan = require("morgan");
+import morgan from "morgan";
 
 export const morgarSetup =
   process.env.NODE_ENVIRONMENT === "production"
