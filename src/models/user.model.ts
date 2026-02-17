@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import jsonwebtoken from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
 const status = Object.freeze({
@@ -64,21 +64,19 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-UserSchema.pre("save", async function (next: any) {
+UserSchema.pre("save", async function () {
   let user = this as any as UserDocument;
 
   // only hash the password if it has been modified (or is new)
-  if (!user.isModified("password")) return next();
+  if (!user.isModified("password")) return;
 
   // Random additional data
   const salt = await bcrypt.genSalt(10);
 
-  const hash = await bcrypt.hashSync(user.password, salt);
+  const hash = bcrypt.hashSync(user.password, salt);
 
   // Replace the password with the hash
   user.password = hash;
-
-  return next();
 });
 
 // Used for logging in
@@ -93,7 +91,7 @@ UserSchema.methods.comparePassword = async function (
 // User for generate email verification token
 UserSchema.methods.generateVerificationToken = async function () {
   const user = this;
-  const verificationToken = jsonwebtoken.sign(
+  const verificationToken = jwt.sign(
     { ID: user._id },
     process.env.USER_VERIFICATION_TOKEN_SECRET as string,
     { expiresIn: "7d" }
