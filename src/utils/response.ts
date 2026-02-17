@@ -21,9 +21,11 @@ const apiResponse = (
   returnObject["data"] = data && data?.data ? data?.data : null;
   returnObject["message"] = data && data?.message ? data?.message : null;
   returnObject["stack"] =
-    typeof optional !== "undefined" && Object.keys(optional).length > 0
-      ? optional
-      : null;
+    optional instanceof Error
+      ? optional.stack
+      : typeof optional !== "undefined" && Object.keys(optional).length > 0
+        ? optional
+        : null;
 
   res.status(status);
   return res.json(returnObject);

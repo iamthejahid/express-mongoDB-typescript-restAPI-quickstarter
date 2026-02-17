@@ -1,4 +1,4 @@
-import jsonwebtoken from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { ObjectId } from "mongoose";
 
 type typeUserObject = {
@@ -12,10 +12,10 @@ const generateToken = async (
   expiredAt: number,
   secret: string
 ) => {
-  return jsonwebtoken.sign(
+  return jwt.sign(
     {
       user: { _id: user._id, name: user.name, email: user.email },
-      exp: new Date(expiredAt).getTime(),
+      exp: Math.floor(expiredAt / 1000),
     },
     secret
   );
@@ -30,7 +30,7 @@ const accessTokenDetailAndRefreshTokenDetail = async (
 
   const accessTokenExpiredAt = accessDate.setMinutes(
     accessDate.getMinutes() +
-      parseInt(process.env.JWT_ACCESS_EXPIRATION_MINUTES as string)
+    parseInt(process.env.JWT_ACCESS_EXPIRATION_MINUTES as string)
   );
 
   const accessToken = await generateToken(
@@ -41,7 +41,7 @@ const accessTokenDetailAndRefreshTokenDetail = async (
 
   const refreshTokenExpiredAt = refreshDate.setMinutes(
     refreshDate.getMinutes() +
-      parseInt(process.env.JWT_REFRESH_EXPIRATION_MINUTES as string)
+    parseInt(process.env.JWT_REFRESH_EXPIRATION_MINUTES as string)
   );
 
   const refreshToken = await generateToken(

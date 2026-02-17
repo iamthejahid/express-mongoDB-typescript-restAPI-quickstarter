@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import httpStatus from "http-status";
-import Joi from "joi";
-import { pick } from "lodash";
+import { z, ZodError } from "zod";
 import apiResponse from "./response";
 
 type typeValidationError = {
@@ -26,29 +25,29 @@ const modelValidationCheck = async (errors: any) => {
 };
 
 const validateRequest =
-  (schema: object) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    const validSchema = pick(schema, ["params", "query", "body"]);
-    const object = pick(req, Object.keys(validSchema));
-    const { value, error } = Joi.compile(validSchema)
-      .prefs({ errors: { label: "key" } })
-      .validate(object, { abortEarly: false });
-
-    if (error) {
-      const err: typeValidationError = {};
-      error.details.forEach((e) => {
-        err[e.path[1]] = e.message.toString();
-      });
-      return apiResponse(
-        res,
-        httpStatus.UNPROCESSABLE_ENTITY,
-        { message: "Validation Error" },
-        err
-      );
-    }
-
-    Object.assign(req, value);
-    return next();
-  };
+  (schema: { body?: z.ZodObject<any>; query?: z.ZodObject<any>; params?: z.ZodObject<any> }) =>
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        if (schema.body) req.body = await schema.body.parseAsync(req.body);
+        if (schema.query) req.query = (await schema.query.parseAsync(req.query)) as any;
+        if (schema.params) req.params = (await schema.params.parseAsync(req.params)) as any;
+        return next();
+      } catch (error) {
+        if (error instanceof ZodError) {
+          const err: typeValidationError = {};
+          error.issues.forEach((e) => {
+            const path = e.path.join(".");
+            err[path] = e.message;
+          });
+          return apiResponse(
+            res,
+            httpStatus.UNPROCESSABLE_ENTITY,
+            { message: "Validation Error" },
+            err
+          );
+        }
+        return next(error);
+      }
+    };
 
 export { uniqueCheck, modelValidationCheck, validateRequest };

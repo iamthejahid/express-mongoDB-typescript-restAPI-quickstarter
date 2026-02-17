@@ -7,6 +7,7 @@ const catchAsyncErr =
     try {
       return await Promise.resolve(fn(req, res, next));
     } catch (err: any) {
+      console.log("CATCH ASYNC ERR:", err);
       return apiResponse(res, httpStatus.BAD_REQUEST, {
         message: "message" in err ? err.message : "Something went wrong",
       });
