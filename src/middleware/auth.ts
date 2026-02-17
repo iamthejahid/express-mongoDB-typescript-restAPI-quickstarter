@@ -12,7 +12,7 @@ const isClientAuthenticated = catchAsyncErr(
         message: "Basic Client Required",
       });
 
-    passport.authenticate("basic", (err, user, info) => {
+    passport.authenticate("basic", (err: any, user: any, info: any) => {
       if (err || info || !user)
         return response(res, httpStatus.UNAUTHORIZED, {
           message: "Invalid Client",
@@ -31,7 +31,7 @@ const isUserAuthenticated = catchAsyncErr(
         message: "Token Required",
       });
 
-    passport.authenticate("jwt", (err, jwt_payload) => {
+    passport.authenticate("jwt", (err: any, jwt_payload: any) => {
       if (err || !jwt_payload) {
         return response(res, httpStatus.UNAUTHORIZED, {
           message: err?.message ? err.message : "Invalid Token",

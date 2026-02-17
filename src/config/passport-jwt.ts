@@ -5,9 +5,9 @@ import { UserModel } from "@main/models/user.model";
 const passportJwtInit = new passportJwt.Strategy(
   {
     jwtFromRequest: passportJwt.ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: process.env.JWT_ACCESS_SECRET,
+    secretOrKey: (process.env.JWT_ACCESS_SECRET as string) || "fallback",
   },
-  async (jwt_payload, done) => {
+  async (jwt_payload: any, done: (err: any, user?: any, info?: any) => void) => {
     if (jwt_payload && jwt_payload.user && jwt_payload.user._id) {
       const accessUser = await UserModel.findOne(
         { _id: jwt_payload.user._id },

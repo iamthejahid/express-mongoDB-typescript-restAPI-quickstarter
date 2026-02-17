@@ -103,7 +103,7 @@ const userLogin = catchAsyncErr(async (req: any, res: Response) => {
 
   // Generate Tokens
   const tokens = await accessTokenDetailAndRefreshTokenDetail(
-    { _id: user._id, name: user.name, email: user.email },
+    { _id: user._id as unknown as ObjectId, name: user.name, email: user.email },
     req.client.secret
   );
 
@@ -140,7 +140,7 @@ const renewToken = catchAsyncErr(async (req: any, res: Response) => {
 
     // Generate Tokens
     const tokens = await accessTokenDetailAndRefreshTokenDetail(
-      { _id: user._id, name: user.name, email: user.email },
+      { _id: user._id as any, name: user.name, email: user.email },
       req.client.secret
     );
 
